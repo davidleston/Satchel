@@ -103,7 +103,29 @@
 <div class="container content">
   <div class="row">
     <div class="span5">
-      <p>Satchel manages the download, upload, and offline access of large files.</p>
+      <p>Satchel manages the download, upload, and offline access of large files. Satchel does the following:</p>
+	  <ul>
+	    <li>Accepts a list of files to queue for transfer (download or upload)</li>
+		<li>Provides information on transfer status including
+		  <ul>
+		    <li>Which files have been transferred</li>
+		    <li>Which files are currently being transferred</li>
+		    <li>The progress of files being transferred</li>
+		    <li>Which files remain to be transferred</li>
+		  </ul></li>
+		<li>Stores files on the local file system.</li>
+		<li>Provides URI to link to in the UI that when clicked will show or download the file</li>
+	    <li>Accepts command to prioritize files.</li>
+	    <li>Accepts a list of files to delete.</li>
+	    <li>Allows for a custom transfer agent in order to:
+		  <ul>
+		    <li>Support protocols such as FTP or WebSockets</li>
+			<li>Support authentication</li>
+			<li>Configure timeout</li>
+		  </ul>
+		</li>
+		<li>Retries failed transfers.</li>
+	  </ul>
       <p>These are Satchel's Satchel components:</p>
       <ul>
         <li><a href="#satchel">Satchel</a></li>
@@ -117,7 +139,7 @@
         <li><state>state</state></li>
         <li><event>event</event></li>
       </ul>
-      This document uses definitions defined in <a href="http://www.ietf.org/rfc/rfc2119.txt" rel="help glossary">RFC 2119</a>.
+      This document uses words defined in <a href="http://www.ietf.org/rfc/rfc2119.txt" rel="help glossary">RFC 2119</a>.
     </div>
     <div class="span7">
       <table class="table table-striped table-bordered table-condensed fileStatus">
