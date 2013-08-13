@@ -1,70 +1,461 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="satchel">
+<head>
+  <title>Satchel - offline storage for Javascript</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <link href="http://alexgorbatchev.com/pub/sh/current/styles/shCore.css" rel="stylesheet" type="text/css" />
+  <link href="http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css" rel="stylesheet" type="text/css" />
+  <style>
+    a {
+      cursor: pointer;
+    }
+    .progress {
+      width: 120px;
+      margin-bottom: 0;
+      background-image: linear-gradient(to bottom,#e5e5e5,#e9e9e9);
+      height: 1em;
+    }
+    .toHead.disabled {
+      opacity: 0.5;
+    }
+    td.noText {
+      vertical-align: middle;
+    }
+    .documentNamePreview {
+      width: 260px;
+      overflow-x: hidden;
+      text-overflow: ellipsis;
+    }
+    .fileStatus .btn-group {
+      font-size: inherit;
+    }
+    .documentNameFull {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Satchel : A framework for handling download, upload, and offline access to large files in the browser." />
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <title>Satchel</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://gh.guidewire.com/labs/satchel">View on GitHub</a>
-
-          <h1 id="project_title">Satchel</h1>
-          <h2 id="project_tagline">A framework for handling download, upload, and offline access to large files in the browser.</h2>
-
-        </header>
+    .content {
+      padding-top: 10px;
+    }
+    .fileStatus caption {
+      margin-bottom: 10px;
+    }
+    .eventDiagram {
+      width: 100%;
+    }
+    td.arrow:before {
+      content: "→";
+    }
+    .fileStatus a {
+      display: block;
+    }
+    .methods:before {
+      content: 'Methods';
+    }
+    .properties:before {
+      content: 'Properties';
+    }
+    .methods > dt, .properties > dt {
+      display: block;
+      border-top: 1px solid rgba(0,0,0,0.2);
+      padding-top: 5px;
+    }
+    dt {
+      font-weight: normal;
+      margin-top: 5px;
+    }
+    .parameters:before {
+      content: 'Parameters';
+    }
+    .syntaxhighlighter {
+      overflow-y: hidden !important;
+    }
+    footer {
+      text-align: center;
+      background-color: black;
+      padding: 5px;
+    }
+    .label {
+      font-weight: normal;
+      text-transform: capitalize;
+    }
+    .title {
+      text-align: center;
+    }
+    em {
+      text-transform:     lowercase;
+      font-variant:       small-caps;
+      font-style:         normal;
+    }
+  </style>
+</head>
+<body>
+<div class="navbar navbar-static-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <h1 class="title">Satchel</h1>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (@defunkt), PJ Hyett (@pjhyett), and Tom Preston-Werner (@mojombo) founded GitHub.</p>
-
-<h3>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
+  </div>
+</div>
+<div class="container content">
+  <div class="row">
+    <div class="span5">
+      <p>Satchel manages the download, upload, and offline access of large files.</p>
+      <p>These are Satchel's Satchel components:</p>
+      <ul>
+        <li><a href="#satchel">Satchel</a></li>
+        <li><a href="#fileInfo">FileInfo</a></li>
+        <li><a href="#transferer">Transferer</a></li>
+        <li><a href="#prioritizer">Prioritizer</a></li>
+      </ul>
+      <p>Legend:</p>
+      <ul class="inline">
+        <li><code>code</code></li>
+        <li><state>state</state></li>
+        <li><event>event</event></li>
+      </ul>
+      This document uses definitions defined in <a href="http://www.ietf.org/rfc/rfc2119.txt" rel="help glossary">RFC 2119</a>.
     </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Satchel maintained by <a href="https://gh.guidewire.com/labs">labs</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
+    <div class="span7">
+      <table class="table table-striped table-bordered table-condensed fileStatus">
+        <caption>Example UI that can be driven by Satchel</caption>
+        <thead>
+        <tr>
+          <th>Claim</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th title="Send to head of queue"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td>Classification Details</td>
+          <td class="noText" title="Downloaded 40% of 1.2 MB">
+            <div class="progress progress-striped">
+              <div class="bar" style="width: 100%;"></div>
+            </div>
+          </td>
+          <td class="noText"><i class="icon-upload toHead disabled"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td>Policy Detail</td>
+          <td class="noText" title="Downloaded 40% of 1.2 MB">
+            <div class="progress progress-striped">
+              <div class="bar" style="width: 40%;"></div>
+            </div>
+          </td>
+          <td class="noText"><i class="icon-upload toHead disabled"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td>Dec page</td>
+          <td class="noText" title="Saving to disk">
+            <div class="progress progress-striped active">
+              <div class="bar" style="width: 100%;"></div>
+            </div>
+          </td>
+          <td class="noText"><i class="icon-upload toHead disabled"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td>Additional Insured Information</td>
+          <td title="Queue position: 1">Download Pending</td>
+          <td class="noText"><i class="icon-upload toHead disabled"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td>
+            <div class="btn-group">
+              <div class="documentNamePreview" data-toggle="dropdown">
+                Exclusion Of Specific Accidents, Products, Work Or Location Detail
+              </div>
+              <ul class="dropdown-menu">
+                <li class="documentNameFull">Exclusion Of Specific Accidents, Products, Work Or Location Detail</li>
+              </ul>
+            </div>
+          </td>
+          <td title="Queue position: 2">Download Pending</td>
+          <td class="noText" title="Send to the head of the line"><i class="icon-upload toHead"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td><a>Photo of damage</a></td>
+          <td title="Queue position: 3">Upload Pending</td>
+          <td class="noText" title="Send to the head of the line"><i class="icon-upload toHead"></i></td>
+        </tr>
+        <tr>
+          <td><a>000-00-050002</a></td>
+          <td><a>Schedule Rating Detail</a></td>
+          <td>Downloaded</td>
+          <td class="noText"><i class="icon-upload toHead disabled"></i></td>
+        </tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+  <div class="row" id="satchel">
+    <h2>Satchel</h2>
+    <div class="span6">
+      <dl class="methods">
+        <dt>constructor</dt>
+        <dd>
+          Creates a new satchel.
+          <pre class="brush: js">
+            var oneGigabyte = 1024 * 1024 * 1024;
+            var satchel = Satchel(oneGigabyte);
+          </pre>
+          <dl class="parameters">
+            <dt><code>storageLimitInBytes</code> required</dt>
+            <dd>Browsers do not limit storage usage.
+              The entire drive could be filled, making the operating system unstable.
+              For this reason, a limit is required.</dd>
+            <dt><code>transferer</code> optional</dt>
+            <dd>Transfers files referred to by <code>FileInfo</code> objects.
+              If none is specified, the default HttpTransferer is used.
+              A <code>transferer</code> could handle authentication,
+              dynamically generate data instead of transferring,
+              or be used for testing.</dd>
+          </dl>
+        </dd>
+        <dt><code>add</code></dt>
+        <dd>Each <code>FileInfo</code> object not already contained in the <code>Satchel</code>
+          is added at the tail of the transfer queue in the order they appear in the provided <code>fileInfos</code>.
+          <pre class="brush: js">
+            satchel.add(fileInfos);
+          </pre>
+          <dl class="parameters">
+            <dt><code>fileInfos</code> required</dt>
+            <dd>An array of FileInfo objects in order of highest priority to lowest priority.</dd>
+          </dl>
+        </dd>
+        <dt><code>prioritize</code></dt>
+        <dd>FileInfo objects in the <state>pending</state> state with a name contained in the provided <code>fileNameList</code>
+          are added to the head of the transfer queue.
+          <pre class="brush: js">
+            satchel.prioritize(fileInfos);
+          </pre>
+          <dl class="parameters">
+            <dt><code>fileNameList</code> required</dt>
+            <dd>An array of strings representing file names in order of highest priority to lowest priority.</dd>
+          </dl>
+        </dd>
+        <dt><code>remove</code></dt>
+        <dd>Removes <code>FileInfo</code> objects with a matching name regardless of state.
+          If a matching <code>FileInfo</code> object is in the <state>transferring</state> state,
+          the transfer is stopped allowing the next in queue to be begin transfer.
+          After the removal of each FileInfo object,
+          the <event>file deleted</event> event is triggered if the <code>Satchel</code> is in the <state>storage full</state> state.
+          <pre class="brush: js">
+            satchel.remove(fileInfos);
+          </pre>
+          <dl class="parameters">
+            <dt><code>fileNameList</code> required</dt>
+            <dd>An array of strings representing file names.</dd>
+          </dl>
+        </dd>
+      </dl>
+    </div>
+    <div class="span6">
+      <eventlist initialState="running" events="
+        running > navigator offline > offline
+        offline > navigator online > running
+        running > user paused > paused
+        paused > user resume > running
+        running > storage full > storage full
+        storage full > file deleted > running
+      "></eventlist>
+      <svg class="eventDiagram" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="573 80 523 199" width="523pt" height="199pt"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:date>2013-03-01 07:09Z</dc:date><!-- Produced by OmniGraffle Professional 5.4.2 --></metadata><defs><filter id="Shadow" filterUnits="userSpaceOnUse"><feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488"/><feOffset in="blur" result="offset" dx="0" dy="4"/><feFlood flood-color="black" flood-opacity=".75" result="flood"/><feComposite in="flood" in2="offset" operator="in"/></filter><font-face font-family="Helvetica" font-size="12" units-per-em="1000" underline-position="-75.683594" underline-thickness="49.316406" slope="0" x-height="522.94922" cap-height="717.28516" ascent="770.01953" descent="-229.98047" font-weight="500"><font-face-src><font-face-name name="Helvetica"/></font-face-src></font-face><marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" viewBox="-1 -6 15 12" markerWidth="15" markerHeight="12" color="black"><g><path d="M 12.000001 0 L 0 -4.5000004 L 0 4.5000004 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/></g></marker></defs><g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1"><title>Canvas 1</title><g><title>Layer 1</title><g><use xl:href="#id42_Graphic" filter="url(#Shadow)"/><use xl:href="#id43_Graphic" filter="url(#Shadow)"/><use xl:href="#id44_Graphic" filter="url(#Shadow)"/><use xl:href="#id64_Graphic" filter="url(#Shadow)"/></g><g id="id42_Graphic"><ellipse cx="847.66203" cy="177.1383" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="847.66203" cy="177.1383" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(808.66203 170.1383)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="16.649414" y="11" textLength="44.701172">Running</tspan></text></g><g id="id43_Graphic"><ellipse cx="1029.3405" cy="237.47897" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="1029.3405" cy="237.47897" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(990.3405 230.47897)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="18.650391" y="11" textLength="40.699219">Paused</tspan></text></g><g id="id44_Graphic"><ellipse cx="639" cy="237.47897" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="639" cy="237.47897" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(600 230.47897)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="21.65918" y="11" textLength="18.667969">Offl</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="40.327148" y="11" textLength="16.013672">ine</tspan></text></g><path d="M 833.9241 202.45234 L 833.9241 218.35234 L 833.9241 237.47897 L 709.90003 237.47897 L 707.90003 237.47897" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="719.21247" y="219.47897" width="97" height="38" fill="white"/><text transform="translate(724.21247 224.47897)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".14355469" y="11" textLength="70.69922">Navigator offl</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="70.842773" y="11" textLength="16.013672">ine</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="2.1416016" y="25" textLength="82.716797">/ airplane mode</tspan></text><path d="M 639 211.34065 L 639 195.44065 L 639 185.18466 L 779.42064 185.18466 L 781.42065 185.18466" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="665.22806" y="173.18466" width="97" height="24" fill="white"/><text transform="translate(670.22806 178.18466)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".140625" y="11" textLength="86.71875">Navigator online</tspan></text><path d="M 1029.3405 211.34065 L 1029.3405 195.44065 L 1029.3405 185.18466 L 915.9034 185.18466 L 913.9034 185.18466" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="926.8928" y="173.18466" width="92" height="24" fill="white"/><text transform="translate(931.8928 178.18466)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".30664062" y="11" textLength="81.38672">User unpaused</tspan></text><path d="M 860.7562 202.52898 L 860.7562 218.42898 L 860.7562 237.47897 L 958.44046 237.47897 L 960.44047 237.47897" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="886.689" y="218.47897" width="50" height="38" fill="white"/><text transform="translate(891.689 223.47897)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" fill="black" x="7.3320312" y="11" textLength="25.335938">User</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" fill="black" x=".31542969" y="25" textLength="39.36914">paused</tspan></text><g id="id64_Graphic"><ellipse cx="1029.3405" cy="113.79864" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="1029.3405" cy="113.79864" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(990.3405 106.79864)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="6.6503906" y="11" textLength="64.69922">Storage Full</tspan></text></g><path d="M 974.3405 113.79864 L 958.4405 113.79864 L 861.39994 113.79864 L 861.39994 135.92425 L 861.39994 137.924255" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="882" y="101.79864" width="79" height="24" fill="white"/><text transform="translate(887 106.79864)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".48046875" y="11" textLength="68.039062">File deleted</tspan></text><path d="M 900.0034 169.09194 L 915.9034 169.09194 L 1029.3405 169.09194 L 1029.3405 155.83695 L 1029.3405 153.83695" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="937.58835" y="157.09194" width="71" height="24" fill="white"/><text transform="translate(942.58835 162.09194)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".1484375" y="11" textLength="60.703125">Storage full</tspan></text></g></g></svg>
+    </div>
+  </div>
+  <div class="row" id="fileInfo">
+    <h2>FileInfo</h2>
+    <div class="span6">
+      Two FileInfo objects are equivalent if the values of their <code>name</code> properties are equivalent.
+      <dl class="properties">
+        <dt><code>name</code> required</dt>
+        <dd>A unique name subject to
+          <a href="http://www.w3.org/TR/file-system-api/#case-sensitivity">case sensitivity</a>
+          and <a href="http://www.w3.org/TR/file-system-api/#naming-restrictions">naming restrictions</a>
+          defined in <a href="http://www.w3.org/TR/file-system-api/">the File System API specification</a>.</dd>
+        <dt><code>transferContext</code> required</dt>
+        <dd>Information the <code>transferer</code> requires to transfer the file.
+          May be used by <code>prioritizer</code>.
+          Usually contains a <abbr title="Universal Resource Identifier">URI</abbr>.</dd>
+        <dt><code>transferStart</code> optional</dt>
+        <dd>Event handler for the <event>transfer starting</event> event.
+          This event is triggered immediately before the transferer is asked to transfer the file.
+          The <event>transfer starting</event> event contains no payload.</dd>
+        <dt><code>progress</code> optional</dt>
+        <dd>Event handler for the progress event.
+          A <event>progress</event> event may never be triggered for a file if transfer completes quickly,
+          or the <code>transferer</code> implementation does not support the <event>progress</event> event.
+          The <event>progress</event> event payload contains the following properties:
+          <dl>
+            <dt><code>bytesTransferred</code> required</dt>
+            <dd>The number of bytes transferred so far.</dd>
+            <dt><code>fileSizeInBytes</code> optional</dt>
+            <dd>Total bytes to be transferred.
+              This may not be included if the server does not send the content length is the response headers,
+              or if a <code>transferer</code> implementation does not support it.</dd>
+          </dl>
+          A <code>transferer</code> implementation may provide additional information.
+          For example, a BitTorrent implementation may include the number of connections.
+        </dd>
+        <dt><code>transferComplete</code> optional</dt>
+        <dd>Event handler for the transfer complete event.
+          This event is triggered when both transfer and storing to the local file system has been completed.
+          A <event>progress</event> event signaling all bytes have been transferred may be triggered before the <event>transfer completed</event> event.
+          Such a <event>progress</event> event would signal that all the bytes have been received but not yet written to the local file system.
+          The <event>transfer starting</event> event contains no payload.</dd>
+        <dt><code>error</code> optional</dt>
+        <dd>Event handler for the error event.
+          The <event>error</event> event is triggered when either transfer or writing to the local file system fails.
+          The <event>error</event> event contains no payload.</dd>
+      </dl>
+    </div>
+    <div class="span6">
+      <eventlist initialState="pending" events="
+        pending > transfer starting > transferring
+        transferring > error > pending
+        transferring > progress > transferring
+        transferring > transfer completed > locally accessible
+        pending > transfer completed > locally accessible
+      ">
+      </eventlist>
+      <svg class="eventDiagram" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" viewBox="76 950 569 169" width="569pt" height="169pt"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:date>2013-03-04 21:29Z</dc:date><!-- Produced by OmniGraffle Professional 5.4.2 --></metadata><defs><filter id="Shadow" filterUnits="userSpaceOnUse"><feGaussianBlur in="SourceAlpha" result="blur" stdDeviation="3.488"/><feOffset in="blur" result="offset" dx="0" dy="4"/><feFlood flood-color="black" flood-opacity=".75" result="flood"/><feComposite in="flood" in2="offset" operator="in"/></filter><font-face font-family="Helvetica" font-size="12" units-per-em="1000" underline-position="-75.683594" underline-thickness="49.316406" slope="0" x-height="522.94922" cap-height="717.28516" ascent="770.01953" descent="-229.98047" font-weight="500"><font-face-src><font-face-name name="Helvetica"/></font-face-src></font-face><marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" viewBox="-1 -6 15 12" markerWidth="15" markerHeight="12" color="black"><g><path d="M 12.000001 0 L 0 -4.5000004 L 0 4.5000004 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/></g></marker></defs><g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1"><title>Canvas 1</title><g><title>Layer 1</title><g><use xl:href="#id95_Graphic" filter="url(#Shadow)"/><use xl:href="#id96_Graphic" filter="url(#Shadow)"/><use xl:href="#id99_Graphic" filter="url(#Shadow)"/></g><g id="id95_Graphic"><ellipse cx="142" cy="1017.1383" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="142" cy="1017.1383" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(103 1010.1383)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="16.980469" y="11" textLength="44.039062">Pending</tspan></text></g><g id="id96_Graphic"><ellipse cx="363" cy="1017.1383" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="363" cy="1017.1383" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(324 1010.1383)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="4.3095703" y="11" textLength="69.38086">Transferring</tspan></text></g><line x1="197.00003" y1="1017.1383" x2="294.09997" y2="1017.1383" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="214.23657" y="997.57263" width="64" height="38" fill="white"/><text transform="translate(219.23657 1002.5726)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".31640625" y="11" textLength="53.367188">Transfer</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="6.3222656" y="25" textLength="41.355469">Starting</tspan></text><g id="id99_Graphic"><ellipse cx="579" cy="1017.1383" rx="55.000088" ry="26.13834" fill="white"/><ellipse cx="579" cy="1017.1383" rx="55.000088" ry="26.13834" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><text transform="translate(540 1003.1383)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="6.0878906" y="11" textLength="8.0039062">A</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="13.880859" y="11" textLength="61.365234">vailable for </tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="2.6484375" y="25" textLength="16.0078125">offl</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="18.65625" y="25" textLength="56.695312">ine access</tspan></text></g><line x1="418.00003" y1="1017.1383" x2="510.09997" y2="1017.1383" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="430.28257" y="998.1383" width="69" height="38" fill="white"/><text transform="translate(435.28257 1003.1383)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x="2.8164062" y="11" textLength="53.367188">Transfer</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".484375" y="25" textLength="58.03125">Completed</tspan></text><path d="M 363 991 L 363 975.1 L 363 962 L 143 962 L 142 962 L 142 975.1 L 142 977.1" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="227.76296" y="950" width="37" height="24" fill="white"/><text transform="translate(232.76296 955)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".16699219" y="11" textLength="26.666016">Error</tspan></text><path d="M 142 1043.2766 L 142 1059.1766 L 142 1100 L 358 1100 L 579 1100 L 579 1059.1766 L 579 1057.1766" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="306.60002" y="1081" width="125" height="38" fill="white"/><text transform="translate(311.60002 1086)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" x=".13378906" y="11" textLength="114.73242">Transfer Completed</tspan><tspan font-family="Helvetica" font-size="12" font-weight="500" x="3.7929688" y="25" textLength="107.41406">already transfered</tspan></text><path d="M 401.89083 1035.62084 L 401.89083 1051.52084 L 401.89083 1063 L 367 1063 L 325 1063 L 325 1035.5726 L 325 1035.5726 L 325 1051.52085 L 324.10917 1051.52085 L 324.10917 1049.52085" marker-end="url(#FilledArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/><rect x="333.72916" y="1051" width="59" height="24" fill="white"/><text transform="translate(338.72916 1056)" fill="black"><tspan font-family="Helvetica" font-size="12" font-weight="500" fill="black" x=".49121094" y="11" textLength="48.017578">Progress</tspan></text></g></g></svg>
+    </div>
+  </div>
+  <div class="row" id="transferer">
+    <h2>Transferer</h2>
+    <div class="span6">
+      Provided to the <code>satchel</code> constructor.
+      Used by the <code>satchel</code> to transfer files.
+      The <code>transferer</code> is responsible for:
+      <ul>
+        <li>Connection management</li>
+        <li>Authentication</li>
+        <li>Timeout detection</li>
+      </ul>
+      <dl class="methods">
+        <dt><code>transfer</code></dt>
+        <dd>Invoked by the <code>satchel</code>.
+          <dl class="parameters">
+            <dt><code>transferContext</code> required</dt>
+            <dd>Information required for transferring the file. Usually includes a <abbr title="Universal Resource Identifier">URI</abbr>.</dd>
+            <dt><code>transferComplete</code> required</dt>
+            <dd>A no-argument event handler.</dd>
+            <dt><code>error</code> required</dt>
+            <dd>A no-argument event handler.</dd>
+          </dl>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <div class="row" id="prioritizer">
+    <h2>Prioritizer</h2>
+    <div class="span6">
+      The <code>prioritizer</code> has the final word on the order of <code>FileInfo</code> objects in the transfer queue.
+      <dl class="methods">
+        <dt><code>prioritize</code></dt>
+        <dd>Maps the <code>transferContexts</code> array to an array of numbers representing the priority of each
+          <code>FileInfo</code> object for which the <code>transferContext</code> belongs.
+          The lower the number, the higher the priority.
+          Negative numbers are allowed.
+          Given a queue containing items A, B, and C with the priorities 2, 4, and 6 respectively,
+          when items D, E, and F are added with priorities 1, 3, and 5 respectively,
+          then the new contents of the queue will be A, D, B, E, C, then F.
+          <dl class="parameters">
+            <dt><code>transferContexts</code> required</dt>
+            <dd>An array of <code>transferContext</code> objects in order of highest priority to lowest priority,
+              though the prioritizer may override the effective order
+              by returning and array of priorities that is not in order of lowest to highest.
+            </dd>
+          </dl>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
+<footer title="You've reached the bottom of the satchel.">
+  <i class="icon-briefcase icon-white"></i>
+</footer>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.3/angular.min.js"></script>
+<script src="js/jquery-1.8.2.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js"></script>
+<script type="text/javascript" src="http://alexgorbatchev.com/pub/sh/current/scripts/shBrushJScript.js"></script>
+<script type="text/directive" id="state">
+  <span class="label label-info" ng-transclude></span>
+</script>
+<script type="text/directive" id="event">
+  <span class="label label-success" ng-transclude></span>
+</script>
+<script type="text/directive" id="eventlist">
+  Initial state is <state>{{initialState}}</state>.
+  <table class="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>State</th>
+        <th class="arrow"></th>
+        <th>Event</th>
+        <th class="arrow"></th>
+        <th>State</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="event in events">
+        <td><state>{{event[0]}}</state></td>
+        <td class="arrow"></td>
+        <td><event>{{event[1]}}</event></td>
+        <td class="arrow"></td>
+        <td><state>{{event[2]}}</state></td>
+      </tr>
+    </tbody>
+  </table>
+</script>
+<script type="text/javascript">
+  angular.module('satchel', []).directive('state', function () {
+    return {
+      restrict: 'E',
+      transclude: true,
+      template: $('#state').text()
+    };
+  }).directive('event', function () {
+    return {
+      restrict: 'E',
+      transclude: true,
+      template: $('#event').text()
+    };
+  }).directive('eventlist', function () {
+    return {
+      restrict: 'E',
+      transclude: true,
+      template: $('#eventlist').text(),
 
-    
+      link: function ( scope, element, attrs ) {
+        var trim = function (str) {
+          return str.trim();
+        };
+        var isNotEmpty = function (str) {
+          return str != '';
+        };
+        var rawEvents = attrs.events;
+        var lines = rawEvents.split(/\r|\n/).map(trim).filter(isNotEmpty);
+        scope.events = lines.map(function (line) {
+            return line.split('>').map(trim);
+        });
+        scope.initialState = attrs.initialstate;
+      }
+    }
+  });
 
-  </body>
+  SyntaxHighlighter.defaults['toolbar'] = false;
+  SyntaxHighlighter.all()
+</script>
+</body>
 </html>
